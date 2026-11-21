@@ -38,11 +38,11 @@ button,.btn{background:var(--btn);color:var(--btnt);border:0;border-radius:6px;p
 .seat textarea{position:absolute;display:block;left:11%;right:11%;top:56%;bottom:5%;resize:none;overflow:hidden;border:0;border-radius:3px;background:var(--field);color:var(--ink);font-family:inherit;font-weight:600;font-size:max(8px,calc(var(--sw)*.125));line-height:1.15;text-align:center;padding:2px;min-width:0}
 .door2{margin:2px 0 4px}
 .head small,.head .addr,.trip label,.trip input{text-shadow:0 0 4px var(--paper)}
-#box{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;z-index:5;padding:16px}#box[hidden]{display:none}#box>div{background:Canvas;color:CanvasText;border-radius:8px;padding:14px;max-width:460px;width:100%}#box textarea{width:100%;height:150px;font:12px monospace}
+#box,#srv{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;z-index:5;padding:16px}#box[hidden],#srv[hidden]{display:none}#srv label{display:block;font-size:13px}#srv input{width:100%;padding:6px;margin:2px 0 8px;font:inherit}#box>div,#srv>div{background:Canvas;color:CanvasText;border-radius:8px;padding:14px;max-width:460px;width:100%}#box textarea{width:100%;height:150px;font:12px monospace}
 .foot{margin-top:8px;font-size:12px;color:var(--muted);text-align:right}
 @media (max-width:640px){.paper{--sw:calc((100vw - 56px)/4.8)}.photos{height:80px}}
 @media print{
- #box{display:none!important}
+ #box,#srv{display:none!important}
  @page{size:A4;margin:6mm}
  :root,:root[data-theme]{--paper:rgba(255,255,255,var(--pa));--ink:#000;--muted:#222;--line:#000;--field:#fff;color-scheme:light}
  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
@@ -77,6 +77,7 @@ button,.btn{background:var(--btn);color:var(--btnt);border:0;border-radius:6px;p
  <button class="alt" onclick="saveFile()">Simpan ke file</button>
  <label class="btn alt">Buka file<input type="file" accept=".json,application/json" id="fopen"></label>
  <button class="alt" onclick="openBox()">Salin / tempel teks</button>
+ <button class="alt" onclick="openSrv()">Simpan online (Google)</button>
  <button class="alt" onclick="resetAll()">Kosongkan nama</button>
 </div>
 
@@ -105,6 +106,13 @@ button,.btn{background:var(--btn);color:var(--btnt);border:0;border-radius:6px;p
  <p><b>Salin / tempel data</b><br>Salin teks ini lalu kirim ke perangkat lain (misalnya lewat WhatsApp). Di sana, tempel teksnya di kotak ini dan tekan Muat.</p>
  <textarea id="boxta" aria-label="Data denah"></textarea>
  <p><button onclick="copyBox()">Salin</button> <button onclick="if(load(boxta.value))box.hidden=true">Muat dari teks</button> <button class="alt" onclick="box.hidden=true">Tutup</button></p>
+</div></div>
+<div id="srv" hidden><div>
+ <p><b>Simpan online (Google)</b><br>Data tersimpan di akun Google Anda dan bisa dimuat dari perangkat mana pun.</p>
+ <label>Alamat skrip (berakhiran /exec)<input id="srvurl" autocomplete="off"></label>
+ <label>Kode<input id="srvkode" type="password" autocomplete="off"></label>
+ <p><button onclick="srvSave()">Simpan ke server</button> <button onclick="srvLoad()">Muat dari server</button> <button class="alt" onclick="srv.hidden=true">Tutup</button></p>
+ <p id="srvmsg" role="status"></p>
 </div></div>
 <script>
 const KEY="denah-bis-v2",IK="denah-bis-img-v2";
@@ -164,6 +172,36 @@ function doPrint(){
 function simpan(){
  try{localStorage.setItem(KEY,JSON.stringify(data));setStatus(localStorage.getItem(KEY)?"Tersimpan di browser ini.":"Gagal menyimpan di browser ini. Pakai Simpan ke file atau Salin teks.")}
  catch(e){setStatus("Penyimpanan di browser ini diblokir. Pakai Simpan ke file atau Salin teks.")}
+}
+const SERVER_URL="";
+const srv=document.getElementById("srv"),srvurl=document.getElementById("srvurl"),srvkode=document.getElementById("srvkode"),srvmsg=document.getElementById("srvmsg");
+function openSrv(){
+ let u=SERVER_URL;try{u=u||localStorage.getItem("denah-srv-url")||""}catch(e){}
+ srvurl.value=u;if(SERVER_URL)srvurl.parentNode.hidden=true;srvmsg.textContent="";srv.hidden=false;(u?srvkode:srvurl).focus();
+}
+function srvCfg(){
+ const u=(SERVER_URL||srvurl.value).trim(),k=srvkode.value;
+ if(!u||!k){srvmsg.textContent="Isi alamat skrip dan kode dulu.";return null}
+ try{localStorage.setItem("denah-srv-url",u)}catch(e){}
+ return{u,k};
+}
+async function srvSave(){
+ const c=srvCfg();if(!c)return;srvmsg.textContent="Menyimpan...";
+ try{
+  const r=await fetch(c.u,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({kode:c.k,data})});
+  const j=await r.json();
+  srvmsg.textContent=j.ok?"Tersimpan di server ("+new Date(j.saved).toLocaleString("id-ID")+").":"Gagal: "+j.error;
+ }catch(e){srvmsg.textContent="Tidak bisa terhubung. Periksa alamat skrip dan koneksi internet."}
+}
+async function srvLoad(){
+ const c=srvCfg();if(!c)return;srvmsg.textContent="Memuat...";
+ try{
+  const r=await fetch(c.u+(c.u.includes("?")?"&":"?")+"kode="+encodeURIComponent(c.k));
+  const j=await r.json();
+  if(!j.ok)srvmsg.textContent="Gagal: "+j.error;
+  else if(!j.data)srvmsg.textContent="Belum ada data tersimpan di server.";
+  else{load(JSON.stringify({data:j.data}));srvmsg.textContent="Data dimuat dari server (disimpan "+new Date(j.saved).toLocaleString("id-ID")+")."}
+ }catch(e){srvmsg.textContent="Tidak bisa terhubung. Periksa alamat skrip dan koneksi internet."}
 }
 function applyData(){
  document.querySelectorAll("[data-s]").forEach(i=>i.value=data["s"+i.dataset.s]||"");
