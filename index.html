@@ -174,7 +174,7 @@ function simpan(){
  try{localStorage.setItem(KEY,JSON.stringify(data));setStatus(localStorage.getItem(KEY)?"Tersimpan di browser ini.":"Gagal menyimpan di browser ini. Pakai Simpan ke file atau Salin teks.")}
  catch(e){setStatus("Penyimpanan di browser ini diblokir. Pakai Simpan ke file atau Salin teks.")}
 }
-const SERVER_URL="";
+const SERVER_URL="https://script.google.com/macros/s/AKfycbwoDS1DZWes7rUWjQsJVV_1NGd4Ax3CpCaQcvIpiOE2GY1W-9cOu8WleO9cE6arEy_Ydg/exec";
 const srv=document.getElementById("srv"),srvurl=document.getElementById("srvurl"),srvkode=document.getElementById("srvkode"),srvmsg=document.getElementById("srvmsg"),srvrem=document.getElementById("srvrem");
 let SC=null,srvReady=false,srvTimer=0;
 const lsGet=k=>{try{return localStorage.getItem(k)||""}catch(e){return ""}};
