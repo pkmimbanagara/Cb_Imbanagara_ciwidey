@@ -111,6 +111,7 @@ button,.btn{background:var(--btn);color:var(--btnt);border:0;border-radius:6px;p
  <p><b>Simpan online (Google)</b><br>Data tersimpan di akun Google Anda dan bisa dimuat dari perangkat mana pun.</p>
  <label>Alamat skrip (berakhiran /exec)<input id="srvurl" autocomplete="off"></label>
  <label>Kode<input id="srvkode" type="password" autocomplete="off"></label>
+ <label><input type="checkbox" id="srvrem" checked style="width:auto;margin:0 6px 8px 0">Ingat di perangkat ini (otomatis muat dan simpan)</label>
  <p><button onclick="srvSave()">Simpan ke server</button> <button onclick="srvLoad()">Muat dari server</button> <button class="alt" onclick="srv.hidden=true">Tutup</button></p>
  <p id="srvmsg" role="status"></p>
 </div></div>
@@ -140,7 +141,7 @@ document.addEventListener("input",e=>{
  const t=e.target;
  if(t.dataset.s){t.value=t.value.replace(/\n/g," ");data["s"+t.dataset.s]=t.value}
  else if(t.dataset.k){data["f_"+t.dataset.k]=t.value}
- save();count();
+ save();count();srvAuto();
 });
 document.querySelectorAll("[data-k]").forEach(i=>i.value=data["f_"+i.dataset.k]||"");
 function resetAll(){
@@ -174,34 +175,49 @@ function simpan(){
  catch(e){setStatus("Penyimpanan di browser ini diblokir. Pakai Simpan ke file atau Salin teks.")}
 }
 const SERVER_URL="";
-const srv=document.getElementById("srv"),srvurl=document.getElementById("srvurl"),srvkode=document.getElementById("srvkode"),srvmsg=document.getElementById("srvmsg");
+const srv=document.getElementById("srv"),srvurl=document.getElementById("srvurl"),srvkode=document.getElementById("srvkode"),srvmsg=document.getElementById("srvmsg"),srvrem=document.getElementById("srvrem");
+let SC=null,srvReady=false,srvTimer=0;
+const lsGet=k=>{try{return localStorage.getItem(k)||""}catch(e){return ""}};
 function openSrv(){
- let u=SERVER_URL;try{u=u||localStorage.getItem("denah-srv-url")||""}catch(e){}
- srvurl.value=u;if(SERVER_URL)srvurl.parentNode.hidden=true;srvmsg.textContent="";srv.hidden=false;(u?srvkode:srvurl).focus();
+ srvurl.value=SERVER_URL||lsGet("denah-srv-url");srvkode.value=lsGet("denah-srv-kode");
+ if(SERVER_URL)srvurl.parentNode.hidden=true;
+ srvmsg.textContent="";srv.hidden=false;(srvurl.value?srvkode:srvurl).focus();
 }
 function srvCfg(){
  const u=(SERVER_URL||srvurl.value).trim(),k=srvkode.value;
  if(!u||!k){srvmsg.textContent="Isi alamat skrip dan kode dulu.";return null}
- try{localStorage.setItem("denah-srv-url",u)}catch(e){}
- return{u,k};
+ try{localStorage.setItem("denah-srv-url",u);if(srvrem.checked)localStorage.setItem("denah-srv-kode",k);else localStorage.removeItem("denah-srv-kode")}catch(e){}
+ SC={u,k};return SC;
 }
+async function srvPost(c){const r=await fetch(c.u,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({kode:c.k,data})});return r.json()}
+async function srvGet(c){const r=await fetch(c.u+(c.u.includes("?")?"&":"?")+"kode="+encodeURIComponent(c.k));return r.json()}
 async function srvSave(){
  const c=srvCfg();if(!c)return;srvmsg.textContent="Menyimpan...";
- try{
-  const r=await fetch(c.u,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({kode:c.k,data})});
-  const j=await r.json();
-  srvmsg.textContent=j.ok?"Tersimpan di server ("+new Date(j.saved).toLocaleString("id-ID")+").":"Gagal: "+j.error;
+ try{const j=await srvPost(c);
+  if(j.ok){srvReady=true;srvmsg.textContent="Tersimpan di server ("+new Date(j.saved).toLocaleString("id-ID")+"). Selanjutnya tersimpan otomatis."}
+  else srvmsg.textContent="Gagal: "+j.error;
  }catch(e){srvmsg.textContent="Tidak bisa terhubung. Periksa alamat skrip dan koneksi internet."}
 }
 async function srvLoad(){
  const c=srvCfg();if(!c)return;srvmsg.textContent="Memuat...";
- try{
-  const r=await fetch(c.u+(c.u.includes("?")?"&":"?")+"kode="+encodeURIComponent(c.k));
-  const j=await r.json();
+ try{const j=await srvGet(c);
   if(!j.ok)srvmsg.textContent="Gagal: "+j.error;
-  else if(!j.data)srvmsg.textContent="Belum ada data tersimpan di server.";
-  else{load(JSON.stringify({data:j.data}));srvmsg.textContent="Data dimuat dari server (disimpan "+new Date(j.saved).toLocaleString("id-ID")+")."}
+  else if(!j.data){srvReady=true;srvmsg.textContent="Belum ada data tersimpan di server."}
+  else{load(JSON.stringify({data:j.data}));srvReady=true;srvmsg.textContent="Data dimuat dari server (disimpan "+new Date(j.saved).toLocaleString("id-ID")+")."}
  }catch(e){srvmsg.textContent="Tidak bisa terhubung. Periksa alamat skrip dan koneksi internet."}
+}
+function srvAuto(){
+ if(!srvReady||!SC)return;clearTimeout(srvTimer);
+ srvTimer=setTimeout(async()=>{try{const j=await srvPost(SC);setStatus(j.ok?"Tersimpan otomatis ke server.":"Gagal simpan otomatis: "+j.error)}catch(e){setStatus("Gagal simpan otomatis: tidak ada koneksi.")}},2500);
+}
+async function srvInit(){
+ const u=SERVER_URL||lsGet("denah-srv-url"),k=lsGet("denah-srv-kode");
+ if(!u||!k)return;SC={u,k};
+ try{const j=await srvGet(SC);
+  if(!j.ok){setStatus("Server: "+j.error);return}
+  if(j.data){load(JSON.stringify({data:j.data}));setStatus("Data dimuat dari server.")}
+  srvReady=true;
+ }catch(e){setStatus("Tidak bisa memuat dari server.")}
 }
 function applyData(){
  document.querySelectorAll("[data-s]").forEach(i=>i.value=data["s"+i.dataset.s]||"");
@@ -225,7 +241,7 @@ const boxta=document.getElementById("boxta"),box=document.getElementById("box");
 function openBox(){boxta.value=JSON.stringify({v:1,data});box.hidden=false;boxta.select()}
 function copyBox(){boxta.select();try{navigator.clipboard.writeText(boxta.value)}catch(e){try{document.execCommand("copy")}catch(_){}}}
 document.getElementById("pb").onchange=e=>document.body.classList.toggle("pb",e.target.checked);
-applyImg();count();
+applyImg();count();srvInit();
 </script>
 </body>
 </html>
