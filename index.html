@@ -58,6 +58,8 @@ button,.btn{background:var(--btn);color:var(--btnt);border:0;border-radius:6px;p
  .seat b{font-size:4.4mm}
  .seat textarea{top:50%;bottom:4%;padding:.3mm;font-size:2.9mm;line-height:1.05}
 }
+.page2{margin-top:0}.page2 h2{margin:0;font:800 20px Georgia,serif;text-align:center}.page2 .sub{text-align:center;color:var(--muted);margin-bottom:8px;font-size:13px}.page2 h3{margin:12px 0 4px;font-size:15px}.page2 table{width:100%;border-collapse:collapse;font-size:13px}.page2 td,.page2 th{border:1px solid var(--line);padding:3px 6px;vertical-align:top;text-align:left}.page2 th{background:var(--arm);color:#fff}.page2 [contenteditable]:focus{outline:2px solid #4c8bf5}
+@media print{.page2{break-before:page;page-break-before:always;font-size:11px}.page2 table{font-size:11px}.page2 h2{font-size:18px}body.norun .page2{display:none}}
 </style>
 </head>
 <body>
@@ -74,9 +76,11 @@ button,.btn{background:var(--btn);color:var(--btnt);border:0;border-radius:6px;p
  <button class="alt" onclick="resetImg()">Kembalikan foto awal</button>
  <label class="opt">Transparan <input type="range" id="pa" min="0.1" max="1" step="0.05" style="width:90px" aria-label="Transparansi kertas"></label>
  <label class="opt"><input type="checkbox" id="pb"> Cetak dengan latar</label>
+ <label class="opt"><input type="checkbox" id="prun" checked> Cetak rundown</label>
  <button class="alt" onclick="saveFile()">Simpan ke file</button>
  <label class="btn alt">Buka file<input type="file" accept=".json,application/json" id="fopen"></label>
  <button class="alt" onclick="openBox()">Salin / tempel teks</button>
+ <button class="alt" onclick="fileInit(true)">Muat data GitHub</button>
  <button class="alt" onclick="openSrv()">Simpan online (Google)</button>
  <button class="alt" onclick="resetAll()">Kosongkan nama</button>
 </div>
@@ -101,6 +105,16 @@ button,.btn{background:var(--btn);color:var(--btnt);border:0;border-radius:6px;p
  <div id="rows"></div>
  <div class="foot" id="count"></div>
 </div>
+
+<section class="paper page2" id="rundown">
+ <h2 contenteditable="true" data-ed>Rundown Acara Capacity Building Puskesmas Imbanagara</h2>
+ <div class="sub" contenteditable="true" data-ed>Ciwidey, Bandung, 28–29 November 2026</div>
+ <table><tr><th style="width:24%">Tema</th><td contenteditable="true" data-ed>[isi tema]</td></tr><tr><th style="width:24%">Tempat</th><td contenteditable="true" data-ed>EMTE Highland, Ciwidey, Bandung</td></tr><tr><th style="width:24%">Peserta</th><td contenteditable="true" data-ed>± 50 orang</td></tr><tr><th style="width:24%">Titik kumpul</th><td contenteditable="true" data-ed>[isi lokasi dan jam kumpul]</td></tr></table>
+ <h3>Hari 1 – Sabtu, 28 November 2026</h3><table><tr><th style="width:24%">Waktu</th><th>Kegiatan</th><th style="width:20%">Penanggung jawab</th></tr><tr><td contenteditable="true" data-ed>05.00 – 05.30</td><td contenteditable="true" data-ed>Kumpul di titik keberangkatan, absensi, pembagian kursi bus</td><td contenteditable="true" data-ed>Sekretaris</td></tr><tr><td contenteditable="true" data-ed>05.30 – 10.00</td><td contenteditable="true" data-ed>Perjalanan menuju Ciwidey (istirahat dan sarapan di jalan)</td><td contenteditable="true" data-ed>Transportasi</td></tr><tr><td contenteditable="true" data-ed>10.00 – 10.30</td><td contenteditable="true" data-ed>Tiba, registrasi ulang, check-in</td><td contenteditable="true" data-ed>Sekretaris</td></tr><tr><td contenteditable="true" data-ed>10.30 – 11.00</td><td contenteditable="true" data-ed>Pembukaan: doa, laporan ketua pelaksana, sambutan Kepala Puskesmas</td><td contenteditable="true" data-ed>MC</td></tr><tr><td contenteditable="true" data-ed>11.00 – 12.00</td><td contenteditable="true" data-ed>Sesi 1: [materi]</td><td contenteditable="true" data-ed>[narasumber]</td></tr><tr><td contenteditable="true" data-ed>12.00 – 13.00</td><td contenteditable="true" data-ed>Ishoma dan makan siang</td><td contenteditable="true" data-ed>Konsumsi</td></tr><tr><td contenteditable="true" data-ed>13.00 – 15.00</td><td contenteditable="true" data-ed>Sesi 2: Diskusi kelompok, identifikasi masalah per unit</td><td contenteditable="true" data-ed>[fasilitator]</td></tr><tr><td contenteditable="true" data-ed>15.00 – 15.30</td><td contenteditable="true" data-ed>Coffee break</td><td contenteditable="true" data-ed>Konsumsi</td></tr><tr><td contenteditable="true" data-ed>15.30 – 17.30</td><td contenteditable="true" data-ed>Sesi 3: Team building dan permainan kelompok</td><td contenteditable="true" data-ed>[fasilitator]</td></tr><tr><td contenteditable="true" data-ed>17.30 – 19.30</td><td contenteditable="true" data-ed>Istirahat, mandi, salat Magrib</td><td contenteditable="true" data-ed>Peserta</td></tr><tr><td contenteditable="true" data-ed>19.30 – 20.15</td><td contenteditable="true" data-ed>Makan malam</td><td contenteditable="true" data-ed>Konsumsi</td></tr><tr><td contenteditable="true" data-ed>20.15 – 21.30</td><td contenteditable="true" data-ed>Evaluasi hari pertama dan acara kebersamaan</td><td contenteditable="true" data-ed>MC</td></tr><tr><td contenteditable="true" data-ed>21.30</td><td contenteditable="true" data-ed>Istirahat</td><td contenteditable="true" data-ed>Peserta</td></tr></table>
+ <h3>Hari 2 – Minggu, 29 November 2026</h3><table><tr><th style="width:24%">Waktu</th><th>Kegiatan</th><th style="width:20%">Penanggung jawab</th></tr><tr><td contenteditable="true" data-ed>05.00 – 06.30</td><td contenteditable="true" data-ed>Salat Subuh, senam atau jalan pagi</td><td contenteditable="true" data-ed>Panitia</td></tr><tr><td contenteditable="true" data-ed>06.30 – 07.30</td><td contenteditable="true" data-ed>Sarapan</td><td contenteditable="true" data-ed>Konsumsi</td></tr><tr><td contenteditable="true" data-ed>07.30 – 09.30</td><td contenteditable="true" data-ed>Sesi 4: Penyusunan rencana tindak lanjut (RTL) per unit</td><td contenteditable="true" data-ed>[fasilitator]</td></tr><tr><td contenteditable="true" data-ed>09.30 – 10.30</td><td contenteditable="true" data-ed>Presentasi RTL dan umpan balik</td><td contenteditable="true" data-ed>Moderator</td></tr><tr><td contenteditable="true" data-ed>10.30 – 11.00</td><td contenteditable="true" data-ed>Penutupan: kesimpulan, kesan dan pesan, foto bersama</td><td contenteditable="true" data-ed>MC</td></tr><tr><td contenteditable="true" data-ed>11.00 – 11.30</td><td contenteditable="true" data-ed>Check-out dan pengecekan kamar</td><td contenteditable="true" data-ed>Sekretaris</td></tr><tr><td contenteditable="true" data-ed>11.30 – 13.00</td><td contenteditable="true" data-ed>Kunjungan wisata sekitar Ciwidey (opsional)</td><td contenteditable="true" data-ed>Acara</td></tr><tr><td contenteditable="true" data-ed>13.00 – 14.00</td><td contenteditable="true" data-ed>Ishoma dan makan siang</td><td contenteditable="true" data-ed>Konsumsi</td></tr><tr><td contenteditable="true" data-ed>14.00 – 19.00</td><td contenteditable="true" data-ed>Perjalanan pulang</td><td contenteditable="true" data-ed>Transportasi</td></tr><tr><td contenteditable="true" data-ed>± 19.00</td><td contenteditable="true" data-ed>Tiba dan acara selesai</td><td contenteditable="true" data-ed>Ketua pelaksana</td></tr></table>
+ <p class="sub" style="margin-top:8px">Klik teks pada tabel untuk mengubahnya.</p>
+</section>
+
 
 <div id="box" hidden><div>
  <p><b>Salin / tempel data</b><br>Salin teks ini lalu kirim ke perangkat lain (misalnya lewat WhatsApp). Di sana, tempel teksnya di kotak ini dan tekan Muat.</p>
@@ -174,7 +188,7 @@ function simpan(){
  try{localStorage.setItem(KEY,JSON.stringify(data));setStatus(localStorage.getItem(KEY)?"Tersimpan di browser ini.":"Gagal menyimpan di browser ini. Pakai Simpan ke file atau Salin teks.")}
  catch(e){setStatus("Penyimpanan di browser ini diblokir. Pakai Simpan ke file atau Salin teks.")}
 }
-const SERVER_URL="https://script.google.com/macros/s/AKfycbwoDS1DZWes7rUWjQsJVV_1NGd4Ax3CpCaQcvIpiOE2GY1W-9cOu8WleO9cE6arEy_Ydg/exec";
+const SERVER_URL="";
 const srv=document.getElementById("srv"),srvurl=document.getElementById("srvurl"),srvkode=document.getElementById("srvkode"),srvmsg=document.getElementById("srvmsg"),srvrem=document.getElementById("srvrem");
 let SC=null,srvReady=false,srvTimer=0;
 const lsGet=k=>{try{return localStorage.getItem(k)||""}catch(e){return ""}};
@@ -210,16 +224,30 @@ function srvAuto(){
  if(!srvReady||!SC)return;clearTimeout(srvTimer);
  srvTimer=setTimeout(async()=>{try{const j=await srvPost(SC);setStatus(j.ok?"Tersimpan otomatis ke server.":"Gagal simpan otomatis: "+j.error)}catch(e){setStatus("Gagal simpan otomatis: tidak ada koneksi.")}},2500);
 }
+async function fileInit(force){
+ try{
+  const r=await fetch("data.json?"+Date.now(),{cache:"no-store"});
+  if(!r.ok){if(force)setStatus("File data.json belum ada di GitHub.");return}
+  const j=await r.json();
+  const has=Object.keys(data).some(k=>k[0]==="s"&&String(data[k]).trim());
+  if(force||!has){if(load(JSON.stringify(j)))setStatus("Data dimuat dari data.json di GitHub.")}
+  else setStatus("Ada nama tersimpan di perangkat ini. Klik Muat data GitHub untuk memakai data dari GitHub.");
+ }catch(e){if(force)setStatus("Tidak bisa membaca data.json.")}
+}
 async function srvInit(){
  const u=SERVER_URL||lsGet("denah-srv-url"),k=lsGet("denah-srv-kode");
- if(!u||!k)return;SC={u,k};
+ if(!u||!k){fileInit(false);return}SC={u,k};
  try{const j=await srvGet(SC);
   if(!j.ok){setStatus("Server: "+j.error);return}
   if(j.data){load(JSON.stringify({data:j.data}));setStatus("Data dimuat dari server.")}
   srvReady=true;
  }catch(e){setStatus("Tidak bisa memuat dari server.")}
 }
-function applyData(){
+const eds=[...document.querySelectorAll("[data-ed]")];
+function applyRd(){if(Array.isArray(data.rd)&&data.rd.length===eds.length)eds.forEach((e,i)=>e.textContent=data.rd[i])}
+eds.forEach(e=>e.addEventListener("input",()=>{data.rd=eds.map(x=>x.textContent);save();if(typeof srvAuto==="function")srvAuto()}));
+document.getElementById("prun").onchange=e=>document.body.classList.toggle("norun",!e.target.checked);
+function applyData(){applyRd();
  document.querySelectorAll("[data-s]").forEach(i=>i.value=data["s"+i.dataset.s]||"");
  document.querySelectorAll("[data-k]").forEach(i=>i.value=data["f_"+i.dataset.k]||"");
  if(data.pa){pa.value=data.pa;setPa(data.pa)}
@@ -241,7 +269,7 @@ const boxta=document.getElementById("boxta"),box=document.getElementById("box");
 function openBox(){boxta.value=JSON.stringify({v:1,data});box.hidden=false;boxta.select()}
 function copyBox(){boxta.select();try{navigator.clipboard.writeText(boxta.value)}catch(e){try{document.execCommand("copy")}catch(_){}}}
 document.getElementById("pb").onchange=e=>document.body.classList.toggle("pb",e.target.checked);
-applyImg();count();srvInit();
+applyImg();count();applyRd();srvInit();
 </script>
 </body>
 </html>
